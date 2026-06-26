@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Prompt utilizado en PFO2 — Prompt Engineering en Agentes de IA — IFTS N.°29" />
+  <title>Prompt — PFO2 · SONORA BCN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0A0A0A;
+      --term-bg: #0E0E10;
+      --term-head: #161618;
+      --accent: #E8FF00;
+      --red: #FF3C5F;
+      --green: #3DFA8B;
+      --text: #F5F5F5;
+      --muted: #8A8A8A;
+      --border: #242427;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      padding: 40px 20px 64px;
+      background-image:
+        linear-gradient(rgba(232,255,0,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,255,0,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .wrap { max-width: 920px; margin: 0 auto; }
+
+    /* TOP BAR */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.25s ease;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .tag {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    /* TERMINAL */
+    .terminal {
+      background: var(--term-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(232,255,0,0.04);
+    }
+
+    .term-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--term-head);
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dots { display: flex; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.r { background: #FF5F56; }
+    .dot.y { background: #FFBD2E; }
+    .dot.g { background: #27C93F; }
+    .term-title {
+      flex: 1;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .term-title .accent { color: var(--accent); }
+
+    .copy-btn {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .copy-btn.done { color: var(--green); border-color: var(--green); }
+
+    .term-body {
+      display: flex;
+      max-height: 72vh;
+      overflow: auto;
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      line-height: 1.7;
+    }
+
+    /* line numbers gutter */
+    .gutter {
+      flex-shrink: 0;
+      padding: 22px 0 22px;
+      text-align: right;
+      color: #44444A;
+      user-select: none;
+      border-right: 1px solid var(--border);
+      background: rgba(255,255,255,0.012);
+    }
+    .gutter span { display: block; padding: 0 16px; }
+
+    .code {
+      flex: 1;
+      padding: 22px 22px 22px 20px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #D6D6D6;
+      tab-size: 2;
+    }
+    .code .prompt-sign { color: var(--accent); }
+
+    /* prompt body coloring via simple classes */
+    .ln-h1 { color: var(--accent); font-weight: 600; }
+    .ln-h2 { color: var(--red); font-weight: 600; }
+    .ln-h3 { color: #6FB3FF; font-weight: 600; }
+    .ln-comment { color: #5C5C62; }
+    .ln-rule { color: #303036; }
+
+    /* scrollbar */
+    .term-body::-webkit-scrollbar { width: 10px; height: 10px; }
+    .term-body::-webkit-scrollbar-track { background: var(--term-bg); }
+    .term-body::-webkit-scrollbar-thumb { background: #2C2C30; border-radius: 6px; }
+    .term-body::-webkit-scrollbar-thumb:hover { background: #3A3A40; }
+
+    .footer-note {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .footer-note span { color: var(--accent); }
+
+    @media (max-width: 640px) {
+      body { padding: 24px 12px 48px; }
+      .term-body { font-size: 0.76rem; }
+      .gutter span { padding: 0 10px; }
+      .code { padding: 18px 14px; }
+      .term-title { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <a href="../index.html" class="back-link">← Volver a la portada</a>
+      <span class="tag">PFO2 · Prompt utilizado</span>
+    </div>
+
+    <div class="terminal">
+      <div class="term-head">
+        <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+        <div class="term-title">zarate@pfo2: ~/<span class="accent">prompt.txt</span></div>
+        <button class="copy-btn" id="copyBtn">📋 Copiar</button>
+      </div>
+      <div class="term-body">
+        <div class="gutter" id="gutter" aria-hidden="true"></div>
+        <pre class="code"><span class="prompt-sign">$</span> cat prompt.txt
+<code id="code"></code></pre>
+      </div>
+    </div>
+
+    <p class="footer-note">Prompt diseñado siguiendo las guías oficiales de <span>Anthropic</span> y <span>OpenAI</span> · IFTS N.°29</p>
+  </div>
+
+  <!-- Raw prompt source (text/plain evita parseo de HTML interno) -->
+  <script type="text/plain" id="promptSrc">
+# PROMPT — Landing Page: Academia de Música "SONORA BCN"
+# Diseñado siguiendo las guías oficiales de Prompt Engineering de Anthropic y OpenAI
+# Autor: PFO2 — Prompt Engineering en Agentes de IA — IFTS N.°29
+
+---
+
+## ROL Y CONTEXTO
+
+Eres un desarrollador web frontend senior especializado en diseño visual de alto impacto. Tu tarea es crear una Landing Page completa, moderna y funcional para "SONORA BCN", una academia de música contemporánea ubicada en el barrio de Palermo, Buenos Aires, Argentina. La academia ofrece clases de guitarra eléctrica, producción musical, canto, batería y piano. Su público objetivo son jóvenes y adultos de 15 a 40 años con pasión por la música urbana, el rock, el pop y la música electrónica.
+
+---
+
+## TAREA PRINCIPAL
+
+Genera un único archivo HTML autocontenido (`index.html`) con CSS embebido en la etiqueta `<style>` y JavaScript mínimo embebido en la etiqueta `<script>`. No uses frameworks externos ni librerías adicionales salvo Google Fonts. El resultado debe ser una Landing Page completa, responsive (mobile-first), visualmente memorable y lista para producción.
+
+---
+
+## ESPECIFICACIONES DE DISEÑO
+
+**Paleta de colores:**
+- Fondo principal: #0D0D0D (negro profundo)
+- Acento primario: #E8FF00 (amarillo eléctrico neón)
+- Acento secundario: #FF3C5F (rojo vibrante)
+- Texto principal: #F5F5F5 (blanco suave)
+- Texto secundario: #9A9A9A (gris medio)
+- Fondo de secciones alternadas: #141414
+
+**Tipografía:**
+- Display/Títulos: "Space Grotesk" (Google Fonts) — peso 700, letras muy espaciadas (letter-spacing: 0.05em)
+- Cuerpo: "Inter" (Google Fonts) — peso 400/500
+
+**Estética general:**
+Diseño oscuro, urbano y enérgico. Inspirado en la estética de festivales de música y estudios de grabación. Usa bordes afilados (border-radius: 0 o 2px máximo), líneas de acento en amarillo neón, y tipografía bold grande que haga impacto.
+
+---
+
+## SECCIONES REQUERIDAS (en este orden exacto)
+
+### 1. HEADER — Navegación fija
+- Logo: texto "SONORA" en font Space Grotesk bold, con "BCN" en color acento #E8FF00
+- Menú de navegación horizontal con links: Inicio | Nosotros | Servicios | Testimonios | Contacto
+- En mobile: menú hamburguesa funcional (toggle con JS)
+- Fondo del header: semi-transparente con backdrop-filter blur al hacer scroll
+- Position: fixed, top: 0, z-index alto
+
+### 2. HERO SECTION — Impacto visual inmediato
+- Fondo: gradiente diagonal de #0D0D0D a #1A0A2E con un patrón de ondas sonoras SVG decorativo en el fondo (baja opacidad)
+- Título principal (H1): "TU MÚSICA. TU IDENTIDAD." — 72px desktop / 40px mobile — en blanco
+- Subtítulo: "Clases de música en Palermo, Buenos Aires. Formación real para artistas reales." — 20px, color gris secundario
+- CTA Button: "EMPEZÁ AHORA" — fondo #E8FF00, texto negro, bold, sin border-radius, padding generoso, hover con efecto de glow
+- Segundo link: "Ver cursos ↓" — texto plano, subrayado en amarillo
+- Badge flotante decorativo: "🎸 +500 alumnos formados"
+
+### 3. SOBRE NOSOTROS — Descripción
+- Título de sección: "¿QUÉ ES SONORA?" con línea decorativa en #E8FF00
+- Texto: "Fundada en 2015 en el corazón de Palermo, SONORA BCN nació con una misión clara: formar músicos completos para el mundo real. No enseñamos teoría vacía — enseñamos a crear, a tocar en vivo y a producir música que suene profesional desde el primer día."
+- Layout de dos columnas: texto a la izquierda, y a la derecha tres stats grandes:
+  * "10+ años de experiencia"
+  * "+500 alumnos formados"
+  * "8 géneros musicales"
+- Cada stat con número grande en #E8FF00 y descripción en blanco
+
+### 4. SERVICIOS — Características principales
+- Título: "LO QUE ENSEÑAMOS"
+- Grid de 3 columnas en desktop, 1 en mobile con 6 tarjetas:
+  1. 🎸 Guitarra Eléctrica — "Desde power chords hasta solos melódicos. Rock, blues, metal y más."
+  2. 🥁 Batería — "Técnica, timing y groove. Clases individuales con kit completo disponible."
+  3. 🎤 Canto — "Técnica vocal, afinación y performance. Para principiantes y avanzados."
+  4. 🎹 Piano & Teclados — "Fundamentos armónicos y síntesis. Del clásico al synthpop."
+  5. 🎛️ Producción Musical — "DAW, mezcla, masterización. Creá tu música desde casa."
+  6. 🎵 Teoría Musical — "La base que todo músico necesita, explicada de forma práctica."
+- Cada tarjeta: fondo #141414, borde izquierdo de 3px en #E8FF00, hover con borde completo y sombra neón
+
+### 5. TESTIMONIOS — Reseñas de clientes
+- Título: "LO QUE DICEN NUESTROS ALUMNOS"
+- Grid de 3 tarjetas con fondo #141414 y border sutil
+- Cada testimonio incluye: texto entre comillas, nombre, instrumento y foto de avatar (usa un div circular con iniciales y fondo de color)
+  * "Sonora cambió mi forma de entender la música. En 6 meses toqué en mi primera banda." — Martín G. — Guitarra
+  * "Los profes son increíbles. Aprendí a producir mis propias canciones desde cero." — Valentina R. — Producción
+  * "El ambiente es único. Se siente como un estudio real, no un aula." — Lucas P. — Batería
+- Estrellas de rating: 5 estrellas en #E8FF00 debajo de cada testimonio
+
+### 6. FORMULARIO DE CONTACTO — Visual, sin backend
+- Título: "EMPEZÁ TU CAMINO"
+- Subtítulo: "Completá el formulario y te contactamos en menos de 24 horas."
+- Campos visuales (sin action real):
+  * Nombre completo (input text)
+  * Email (input email)
+  * Instrumento de interés (select con las 6 opciones)
+  * Mensaje (textarea)
+- Botón: "ENVIAR CONSULTA" — mismo estilo CTA del hero
+- Todos los campos: fondo #141414, borde #333, foco con borde #E8FF00, texto blanco
+- Al lado del formulario (desktop): info de contacto con íconos SVG:
+  * 📍 Av. Santa Fe 3500, Palermo, CABA
+  * 📞 +54 11 4567-8900
+  * 📧 hola@sonorabcn.com
+  * Horarios: Lunes a Sábado 9:00–22:00
+
+### 7. FOOTER — Pie de página
+- Logo repetido "SONORA BCN"
+- Frase: "Formando músicos desde 2015."
+- Links a redes sociales con íconos SVG inline (no usar FontAwesome):
+  * Instagram — URL: #instagram
+  * YouTube — URL: #youtube
+  * Spotify — URL: #spotify
+  * TikTok — URL: #tiktok
+- Íconos: círculo con fondo #1A1A1A, borde sutil, ícono blanco, hover fondo #E8FF00 con ícono negro
+- Copyright: "© 2026 SONORA BCN. Todos los derechos reservados."
+- Cuatro columnas: Logo+descripción | Navegación | Servicios | Contacto rápido
+
+---
+
+## REQUISITOS TÉCNICOS OBLIGATORIOS
+
+1. **Un solo archivo**: Todo en `index.html`. Sin archivos externos excepto Google Fonts vía `<link>`.
+2. **Responsive**: Mobile-first. Breakpoints: 768px (tablet), 1024px (desktop). Usa CSS Grid y Flexbox.
+3. **Smooth scroll**: `scroll-behavior: smooth` en el html y navegación funcional con anclas `#section`.
+4. **Menú hamburguesa**: Funcional en mobile con toggle de clase CSS via JavaScript vanilla.
+5. **Header sticky**: Cambia opacidad/background al hacer scroll (JS con `window.addEventListener('scroll', ...)`).
+6. **Animación de entrada**: Las secciones aparecen con fade-in al entrar en viewport (IntersectionObserver).
+7. **Hover states**: Todos los botones e íconos tienen transiciones suaves (`transition: all 0.3s ease`).
+8. **Accesibilidad**: Usa atributos `alt`, `aria-label` donde corresponda. Contraste AA mínimo.
+9. **Meta tags**: Incluye `<meta name="description">` y `<meta name="viewport">`.
+10. **Sin errores**: El HTML debe ser semánticamente correcto. Usa `<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`.
+
+---
+
+## RESTRICCIONES EXPLÍCITAS
+
+- NO uses Bootstrap, Tailwind, jQuery ni ningún framework CSS o JS.
+- NO uses imágenes externas (usa gradientes, SVGs inline y elementos CSS puros).
+- NO dejes secciones vacías ni con placeholder como "Lorem ipsum".
+- NO uses border-radius mayor a 4px en elementos principales (estética sharp).
+- NO uses colores fuera de la paleta definida salvo variaciones de opacidad.
+
+---
+
+## OUTPUT ESPERADO
+
+Entrega únicamente el código completo del archivo `index.html`, comenzando con `<!DOCTYPE html>` y terminando con `</html>`. Sin explicaciones adicionales, sin bloques de código Markdown. Solo el HTML puro y completo.
+</script>
+
+  <script>
+    (function () {
+      var raw = document.getElementById('promptSrc').textContent.replace(/^\n/, '').replace(/\s+$/, '');
+      var lines = raw.split('\n');
+      var codeEl = document.getElementById('code');
+      var gutterEl = document.getElementById('gutter');
+
+      function classFor(line) {
+        var t = line.trim();
+        if (t.indexOf('### ') === 0) return 'ln-h3';
+        if (t.indexOf('## ') === 0) return 'ln-h2';
+        if (t.indexOf('# ') === 0 && t.indexOf('##') !== 0) return 'ln-h1';
+        if (t === '---') return 'ln-rule';
+        return '';
+      }
+
+      // Spacer en el gutter para alinear con la línea de comando "$ cat prompt.txt"
+      var spacer = document.createElement('span');
+      spacer.textContent = '\u00A0';
+      gutterEl.appendChild(spacer);
+
+      var frag = document.createDocumentFragment();
+      lines.forEach(function (line, i) {
+        var span = document.createElement('span');
+        var cls = classFor(line);
+        if (cls) span.className = cls;
+        span.textContent = line.length ? line : '\u00A0';
+        frag.appendChild(span);
+        frag.appendChild(document.createTextNode('\n'));
+
+        var g = document.createElement('span');
+        g.textContent = (i + 1);
+        gutterEl.appendChild(g);
+      });
+      codeEl.appendChild(frag);
+
+      // Copy to clipboard
+      var btn = document.getElementById('copyBtn');
+      btn.addEventListener('click', function () {
+        navigator.clipboard.writeText(raw).then(function () {
+          btn.textContent = '✓ Copiado';
+          btn.classList.add('done');
+          setTimeout(function () { btn.textContent = '📋 Copiar'; btn.classList.remove('done'); }, 2200);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
